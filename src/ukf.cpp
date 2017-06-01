@@ -100,9 +100,24 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   time_us_ = meas_package.timestamp_;
   double_t threshold = 1e-3;
 
+  switch (sensorType) {
+    case MeasurementPackage::RADAR:
+      break;
+    case MeasurementPackage::LASER:
+      return;
+      break;
+    default:
+      break;
+  }
   if (delta_t >= threshold) {
+
+    cout << "x_:" << x_ << endl;
+    cout << "P_:" << P_ << endl;
+
     Prediction(delta_t);
   }
+
+  UpdateRadar(meas_package);
 }
 
 /**

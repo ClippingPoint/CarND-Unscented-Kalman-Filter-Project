@@ -27,6 +27,8 @@ public:
 
   MatrixXd NormalizeAngle(MatrixXd &Z_diff, int dim);
 
+  VectorXd NormalizeAngleVec(VectorXd &z_diff, int dim);
+
   MatrixXd Cart2Polar(const MatrixXd &Xsig);
 };
 

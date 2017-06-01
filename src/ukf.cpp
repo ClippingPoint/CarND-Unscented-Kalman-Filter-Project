@@ -144,6 +144,22 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   MatrixXd S = MatrixXd::Zero(n_z_, n_z_);
   MatrixXd Zsig = tools.Cart2Polar(fusionUKF.Xsig_pred_);
   MatrixXd Z_diff = fusionUKF._PredictMeanAndCovariance(&z_pred, &S, 1, Zsig);
+  fusionUKF._PropagateNoise(&S);
+  fusionUKF.Z_diff = Z_diff;
+//  Kalman Process
+  MatrixXd Tc = fusionUKF._GetCrossCovariance(fusionUKF.X_diff, fusionUKF.Z_diff);
+  MatrixXd K = Tc * S.inverse();
+  VectorXd z_diff = meas_package.raw_measurements_ - z_pred;
+
+  // angle normalization
+  z_diff = tools.NormalizeAngleVec(z_diff, 1);
+
+  // update state mean and covariance matrix
+  fusionUKF.x_ = fusionUKF.x_ + K * z_diff;
+  fusionUKF.P_ = fusionUKF.P_ - K * S * K.transpose();
+
+  x_ = fusionUKF.x_;
+  P_ = fusionUKF.P_;
 }
 
 /**

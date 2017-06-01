@@ -29,6 +29,13 @@ MatrixXd Tools::NormalizeAngle(MatrixXd &Z_diff, int dim) {
   return Z_diff;
 }
 
+VectorXd Tools::NormalizeAngleVec(MatrixXd &z_diff, int dim) {
+  double_t TWO_PI = 2. * M_PI;
+  while(z_diff(dim) > M_PI) { z_diff(dim) -= TWO_PI; }
+  while(z_diff(dim) < -M_PI) { z_diff(dim) += TWO_PI; }
+  return z_diff;
+}
+
 
 /**
  *

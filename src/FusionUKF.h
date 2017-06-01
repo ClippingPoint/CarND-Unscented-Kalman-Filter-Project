@@ -30,6 +30,8 @@ public:
 
   MatrixXd X_diff;
 
+  MatrixXd Z_diff;
+
   long long time_us_;
 
   double_t std_a_;

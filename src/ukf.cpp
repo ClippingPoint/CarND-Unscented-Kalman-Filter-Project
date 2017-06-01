@@ -53,6 +53,8 @@ UKF::UKF() {
   n_aug_ = 7;
   lambda_ = 3;
 
+  is_initialized_ = false;
+
   // Radar
   // initial state vector
   x_ = VectorXd::Zero(n_aug_);
@@ -87,7 +89,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
         P_ = fusionUKF.P_;
         break;
       case MeasurementPackage::LASER:
-        break;
+        return;
+//        break;
       default:
         break;
     }
@@ -105,19 +108,15 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
       break;
     case MeasurementPackage::LASER:
       return;
-      break;
+//      break;
     default:
       break;
   }
   if (delta_t >= threshold) {
-
-    cout << "x_:" << x_ << endl;
-    cout << "P_:" << P_ << endl;
-
     Prediction(delta_t);
   }
 
-  UpdateRadar(meas_package);
+//  UpdateRadar(meas_package);
 }
 
 /**
@@ -132,9 +131,6 @@ void UKF::Prediction(double delta_t) {
   Complete this function! Estimate the object's location. Modify the state
   vector, x_. Predict sigma points, the state, and the state covariance matrix.
   */
-  fusionUKF.x_ = x_;
-  fusionUKF.P_ = P_;
-
   MatrixXd Xsig_aug = fusionUKF._GenerateSigmaPoints();
   fusionUKF._MotionPrediction(Xsig_aug, delta_t);
   VectorXd x_pred = VectorXd::Zero(n_aug_);

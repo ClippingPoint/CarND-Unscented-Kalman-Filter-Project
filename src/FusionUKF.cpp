@@ -63,6 +63,7 @@ VectorXd FusionUKF::_GenerateWeights(int dim) {
 }
 
 void FusionUKF::_InitState(MeasurementPackage meas_package) {
+  std::cout << x_ << std::endl;
   x_.fill(0.0);
   // x_(0) = 5.7441
   // x_(1) = 1.3800
@@ -88,6 +89,8 @@ void FusionUKF::_InitProcessMatrix() {
   P_.topLeftCorner(n_x_, n_x_) = P_sub;
   P_(5, 5) = pow(std_a_, 2);
   P_(6, 6) = pow(std_yawdd_, 2);
+
+  std::cout << "Sigma Points" << std::endl << P_ << std::endl;
 }
 
 /**
@@ -95,6 +98,7 @@ void FusionUKF::_InitProcessMatrix() {
  * @return
  */
 MatrixXd FusionUKF::_GenerateSigmaPoints() {
+
   MatrixXd L = P_.llt().matrixL();
 
   // create augmented sigma points

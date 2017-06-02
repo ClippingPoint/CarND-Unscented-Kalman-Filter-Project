@@ -116,7 +116,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
     Prediction(delta_t);
   }
 
-//  UpdateRadar(meas_package);
+  UpdateRadar(meas_package);
 }
 
 /**
@@ -133,6 +133,8 @@ void UKF::Prediction(double delta_t) {
   */
   MatrixXd Xsig_aug = fusionUKF._GenerateSigmaPoints();
   fusionUKF._MotionPrediction(Xsig_aug, delta_t);
+  std::cout << "Xsig:" << Xsig_aug << std::endl;
+  std::cout << "Xsig:" << fusionUKF.Xsig_pred_ << std::endl;
   VectorXd x_pred = VectorXd::Zero(n_aug_);
   MatrixXd P_pred = MatrixXd::Zero(n_aug_, n_aug_);
   fusionUKF.X_diff = fusionUKF._PredictMeanAndCovariance(&x_pred, &P_pred,

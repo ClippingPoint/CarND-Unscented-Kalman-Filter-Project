@@ -95,7 +95,7 @@ private:
 
   void _InitProcessMatrix();
 
-
+  void _AugmentStateAndProcess(VectorXd *x_out, MatrixXd* P_out);
 };
 
 

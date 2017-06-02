@@ -17,15 +17,15 @@ FusionUKF::FusionUKF() {
 
   lambda_ = 3;
 
-  x_ = VectorXd::Zero(n_aug_);
+  x_ = VectorXd::Zero(n_x_);
 
-  P_ = MatrixXd::Identity(n_aug_, n_aug_);
+  P_ = MatrixXd::Identity(n_x_, n_x_);
 
-  Xsig_pred_ = MatrixXd::Zero(n_aug_, 2 * n_aug_ + 1);
+  Xsig_pred_ = MatrixXd::Zero(n_x_, 2 * n_aug_ + 1);
 
   std_a_ = 0.2;
 
-  std_yawdd_ = 0.3;
+  std_yawdd_ = 0.2;
 
   std_laspx_ = 0.15;
 
@@ -63,34 +63,42 @@ VectorXd FusionUKF::_GenerateWeights(int dim) {
 }
 
 void FusionUKF::_InitState(MeasurementPackage meas_package) {
-  std::cout << x_ << std::endl;
   x_.fill(0.0);
   // x_(0) = 5.7441
   // x_(1) = 1.3800
   x_(0) = meas_package.raw_measurements_[0];
   x_(1) = meas_package.raw_measurements_[1];
+  x_(0) = 5.7441;
+  x_(1) = 1.3800;
   x_(2) = 2.2049;
   x_(3) = 0.5015;
   x_(4) = 0.3528;
-  // x_(5) = 0;
-  // x_(6) = 0;
 }
 
 void FusionUKF::_InitProcessMatrix() {
-  MatrixXd P_sub = MatrixXd::Zero(n_x_, n_x_);
-
-  P_sub << 0.0043, -0.0013, 0.0030, -0.0022, -0.0020,
+  P_ << 0.0043, -0.0013, 0.0030, -0.0022, -0.0020,
         -0.0013, 0.0077, 0.0011, 0.0071, 0.0060,
         0.0030, 0.0011, 0.0054, 0.0007, 0.0008,
         -0.0022, 0.0071, 0.0007, 0.0098, 0.0010,
         -0.0020, 0.0060, 0.0008, 0.0100, 0.0123;
+}
 
-  P_.fill(0.0);
-  P_.topLeftCorner(n_x_, n_x_) = P_sub;
-  P_(5, 5) = pow(std_a_, 2);
-  P_(6, 6) = pow(std_yawdd_, 2);
+void FusionUKF::_AugmentStateAndProcess(VectorXd *x_out, MatrixXd *P_out) {
+  VectorXd x_aug = VectorXd::Zero(n_aug_);
+  x_aug(0) = x_(0);
+  x_aug(1) = x_(1);
+  x_aug(2) = x_(2);
+  x_aug(3) = x_(3);
+  x_aug(4) = x_(4);
+  x_aug(5) = 0;
+  x_aug(6) = 0;
 
-  std::cout << "Sigma Points" << std::endl << P_ << std::endl;
+  MatrixXd P_aug = MatrixXd::Zero(n_aug_, n_aug_);
+  P_aug.topLeftCorner(n_x_, n_x_) = P_;
+  P_aug(5, 5) = pow(std_a_, 2);
+  P_aug(6, 6) = pow(std_yawdd_, 2);
+  *x_out = x_aug;
+  *P_out = P_aug;
 }
 
 /**
@@ -99,7 +107,10 @@ void FusionUKF::_InitProcessMatrix() {
  */
 MatrixXd FusionUKF::_GenerateSigmaPoints() {
 
-  MatrixXd L = P_.llt().matrixL();
+  VectorXd x_aug = VectorXd::Zero(n_aug_);
+  MatrixXd P_aug = MatrixXd::Zero(n_aug_, n_aug_);
+  _AugmentStateAndProcess(&x_aug, &P_aug);
+  MatrixXd L = P_aug.llt().matrixL();
 
   // create augmented sigma points
   MatrixXd Xsig_aug = MatrixXd(n_aug_, 2 * n_aug_ + 1);
@@ -107,9 +118,10 @@ MatrixXd FusionUKF::_GenerateSigmaPoints() {
 //  MatrixXd row_vector = MatrixXd::Ones(1, n_aug_);
 //  Column duplication
   VectorXd row_vector = VectorXd::Ones(n_aug_);
-  row_vector = row_vector.transpose();
 
-  MatrixXd x_mat = x_ * row_vector;
+  // Outer product
+  //x_mat.noalias() = x_ * row_vector.transpose();
+  MatrixXd x_mat = x_aug * row_vector.transpose();
 
   MatrixXd left_block = MatrixXd::Zero(n_aug_, n_aug_);
   left_block = x_mat + sqrt(lambda_) * L;
@@ -117,10 +129,9 @@ MatrixXd FusionUKF::_GenerateSigmaPoints() {
   MatrixXd right_block = MatrixXd::Zero(n_aug_, n_aug_);
   right_block = x_mat - sqrt(lambda_) * L;
 
-  Xsig_aug.col(0) = x_;
-  Xsig_aug.block(0, 1, n_aug_, n_aug_ + 1)  = left_block;
-  Xsig_aug.block(0, n_aug_, n_aug_, 2 * n_aug_ + 1) = right_block;
-
+  Xsig_aug.col(0) = x_aug;
+  Xsig_aug.block(0, 1, n_aug_, n_aug_)  = left_block;
+  Xsig_aug.block(0, n_aug_ + 1, n_aug_, n_aug_) = right_block;
   return Xsig_aug;
 }
 
@@ -157,6 +168,8 @@ void FusionUKF::_MotionPrediction(MatrixXd &Xsig_aug, double_t delta_t){
   VectorXd yawd_p = yawd;
 
   // add noise
+//  px_p = px_p.array() + 0.5*nu_a.array()*pow(delta_t, 2)*cos(yaw.array());
+//  py_p = py_p.array() + 0.5*nu_a.array()*pow(delta_t, 2)*sin(yaw.array());
   px_p = px_p.array() + 0.5*nu_a.array()*pow(delta_t, 2)*cos(yaw.array());
   py_p = py_p.array() + 0.5*nu_a.array()*pow(delta_t, 2)*sin(yaw.array());
   v_p = v_p.array() + nu_a.array() * delta_t;
@@ -169,9 +182,6 @@ void FusionUKF::_MotionPrediction(MatrixXd &Xsig_aug, double_t delta_t){
   Xsig_pred_.row(2) = v_p;
   Xsig_pred_.row(3) = yaw_p;
   Xsig_pred_.row(4) = yawd_p;
-
-  Xsig_pred_.row(5) = nu_a;
-  Xsig_pred_.row(6) = nu_yawdd;
 }
 /**
  *
@@ -192,9 +202,8 @@ MatrixXd FusionUKF::_PredictMeanAndCovariance(VectorXd *x_out, MatrixXd *P_out,
   MatrixXd W = weights_.asDiagonal();
   // Column Duplication
   VectorXd row_vector = VectorXd::Ones(2 * n_aug_ + 1);
-  row_vector = row_vector.transpose();
 
-  MatrixXd x_mat = x * row_vector;
+  MatrixXd x_mat = x * row_vector.transpose();
   MatrixXd X_diff = SIG - x_mat;
 
   // Normalization

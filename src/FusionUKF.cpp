@@ -68,6 +68,10 @@ void FusionUKF::_InitState(MeasurementPackage meas_package) {
   // x_(1) = 1.3800
   x_(0) = meas_package.raw_measurements_[0];
   x_(1) = meas_package.raw_measurements_[1];
+
+  /**
+   * Test only
+   */
   x_(0) = 5.7441;
   x_(1) = 1.3800;
   x_(2) = 2.2049;
@@ -140,6 +144,10 @@ MatrixXd FusionUKF::_GenerateSigmaPoints() {
  * @param Xsig_aug
  */
 void FusionUKF::_MotionPrediction(MatrixXd &Xsig_aug, double_t delta_t){
+  /**
+   * Test only
+   */
+  delta_t = 0.1;
   VectorXd p_x = Xsig_aug.row(0);
   VectorXd p_y = Xsig_aug.row(1);
   VectorXd v = Xsig_aug.row(2);
@@ -152,31 +160,38 @@ void FusionUKF::_MotionPrediction(MatrixXd &Xsig_aug, double_t delta_t){
   int vec_len = 2 * n_aug_ + 1;
   VectorXd px_p = VectorXd::Zero(vec_len);
   VectorXd py_p = VectorXd::Zero(vec_len);
+
+  VectorXd v_p = VectorXd::Zero(vec_len);
+  VectorXd yaw_p = VectorXd::Zero(vec_len);
+  VectorXd yawd_p = VectorXd::Zero(vec_len);
+
   for (int i = 0; i < vec_len; i+=1) {
-    if(fabs(yawd(i)) > threshold) {
-      px_p(i) = p_x(i) + v(i)/yawd(i) * ( sin(yaw(i) + yawd(i) * delta_t) - sin(yaw(i)));
-      py_p(i) = p_y(i) + v(i)/yawd(i) * ( cos(yaw(i)) - cos(yawd(i) + yawd(i) * delta_t));
-    } else {
-      px_p(i) = p_x(i) + v(i) * delta_t * cos(yaw(i));
-      py_p(i) = p_y(i) + v(i) * delta_t * sin(yaw(i));
+    //avoid division by zero
+    if (fabs(yawd(i)) > 0.001) {
+      px_p(i) = p_x(i) + v(i)/yawd(i) * ( sin (yaw(i) + yawd(i)*delta_t) - sin(yaw(i)));
+      py_p(i) = p_y(i) + v(i)/yawd(i) * ( cos(yaw(i)) - cos(yaw(i)+yawd(i)*delta_t) );
     }
+    else {
+      px_p(i) = p_x(i) + v(i)*delta_t*cos(yaw(i));
+      py_p(i) = p_y(i) + v(i)*delta_t*sin(yaw(i));
+    }
+
+    v_p(i) = v(i);
+    yaw_p(i) = yaw(i) + yawd(i)*delta_t;
+    yawd_p(i) = yawd(i);
+
+    /**
+     * TODO: How to do this element wise
+     */
+    //add noise
+    px_p(i) = px_p(i) + 0.5*nu_a(i)*delta_t*delta_t * cos(yaw(i));
+    py_p(i) = py_p(i) + 0.5*nu_a(i)*delta_t*delta_t * sin(yaw(i));
+    v_p(i) = v_p(i) + nu_a(i)*delta_t;
   }
 
-  VectorXd v_p = v;
+  yaw_p = yaw_p + 0.5*nu_yawdd*delta_t*delta_t;
+  yawd_p = yawd_p + nu_yawdd*delta_t;
   // Element wise operations
-  VectorXd yaw_p = yaw.array() + yaw.array() * delta_t;
-  VectorXd yawd_p = yawd;
-
-  // add noise
-//  px_p = px_p.array() + 0.5*nu_a.array()*pow(delta_t, 2)*cos(yaw.array());
-//  py_p = py_p.array() + 0.5*nu_a.array()*pow(delta_t, 2)*sin(yaw.array());
-  px_p = px_p.array() + 0.5*nu_a.array()*pow(delta_t, 2)*cos(yaw.array());
-  py_p = py_p.array() + 0.5*nu_a.array()*pow(delta_t, 2)*sin(yaw.array());
-  v_p = v_p.array() + nu_a.array() * delta_t;
-
-  yaw_p = yaw_p.array() + 0.5*nu_yawdd.array()*pow(delta_t, 2);
-  yawd_p = yawd_p.array() + nu_yawdd.array()*delta_t;
-
   Xsig_pred_.row(0) = px_p;
   Xsig_pred_.row(1) = py_p;
   Xsig_pred_.row(2) = v_p;

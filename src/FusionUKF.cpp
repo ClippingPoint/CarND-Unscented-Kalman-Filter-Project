@@ -58,7 +58,7 @@ VectorXd FusionUKF::_GenerateWeights(int dim) {
   VectorXd weights = VectorXd::Zero(2 * dim + 1);
 //  double_t weight_0 = lambda_/(lambda_);
   weights.fill(0.5/lambda_);
-  weights(0) = 1;
+  weights(0) = (lambda_ - n_aug_)/lambda_;
   return weights;
 }
 
@@ -211,8 +211,7 @@ void FusionUKF::_MotionPrediction(MatrixXd &Xsig_aug, double_t delta_t){
  */
 MatrixXd FusionUKF::_PredictMeanAndCovariance(VectorXd *x_out, MatrixXd *P_out,
                                           int norm_dim, MatrixXd &SIG) {
-  VectorXd SIG_weights = SIG * weights_;
-  VectorXd x = SIG_weights.transpose();
+  VectorXd x = SIG * weights_;
 //  auto W?
   MatrixXd W = weights_.asDiagonal();
   // Column Duplication

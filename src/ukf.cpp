@@ -100,7 +100,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
     return;
   }
 
-  double_t delta_t = meas_package.timestamp_ - time_us_;
+  // in seconds
+  double_t delta_t = tools.GetTimeDiff(meas_package.timestamp_, time_us_);
   time_us_ = meas_package.timestamp_;
   double_t threshold = 1e-3;
 
@@ -188,15 +189,14 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   /**
    * Test only
    */
-  //VectorXd z_diff = meas_package.raw_measurements_ - z_pred;
-  VectorXd z = VectorXd::Zero(n_z_);
+/*  VectorXd z = VectorXd::Zero(n_z_);
   z << 5.9214, 0.2187, 2.0062;
-//  VectorXd z_diff = meas_package.raw_measurements_ - z_pred;
   VectorXd z_diff = z - z_pred;
 
   std::cout << "Tc" << std::endl << Tc << std::endl;
   std::cout << "Xsig_pred" << std::endl << fusionUKF.Xsig_pred_ << std::endl;
-
+*/
+  VectorXd z_diff = meas_package.raw_measurements_ - z_pred;
   // angle normalization
   z_diff = tools.NormalizeAngleVec(z_diff, 1);
 

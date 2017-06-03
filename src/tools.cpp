@@ -101,3 +101,12 @@ MatrixXd Tools::Cart2Polar(const MatrixXd &Xsig) {
   return H_x;
 }
 
+/**
+ * Time diff in seconds
+ * @param curr_time
+ * @param prev_time
+ * @return
+ */
+double_t Tools::GetTimeDiff(long long curr_time, long long prev_time) {
+  return (double_t)(curr_time - prev_time)/1000000.0;
+}

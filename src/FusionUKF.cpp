@@ -42,7 +42,7 @@ FusionUKF::FusionUKF() {
   // Radar
   n_z_ = 3;
 
-  time_us_ = 0;
+//  time_us_ = 0;
 
   weights_ = _GenerateWeights(n_aug_);
 }
@@ -58,7 +58,6 @@ void FusionUKF::Init(MeasurementPackage meas_package) {
 
 VectorXd FusionUKF::_GenerateWeights(int dim) {
   VectorXd weights = VectorXd::Zero(2 * dim + 1);
-//  double_t weight_0 = lambda_/(lambda_);
   weights.fill(0.5/lambda_);
   weights(0) = (lambda_ - n_aug_)/lambda_;
   return weights;
@@ -70,15 +69,17 @@ void FusionUKF::_InitState(MeasurementPackage meas_package) {
   // x_(1) = 1.3800
   x_(0) = meas_package.raw_measurements_[0];
   x_(1) = meas_package.raw_measurements_[1];
-
-  /**
-   * Test only
-   */
-  x_(0) = 5.7441;
-  x_(1) = 1.3800;
   x_(2) = 2.2049;
   x_(3) = 0.5015;
   x_(4) = 0.3528;
+  /**
+   * Test only
+   */
+  /*x_(0) = 5.7441;
+  x_(1) = 1.3800;
+  x_(2) = 2.2049;
+  x_(3) = 0.5015;
+  x_(4) = 0.3528;*/
 }
 
 void FusionUKF::_InitProcessMatrix() {
@@ -149,7 +150,7 @@ void FusionUKF::_MotionPrediction(MatrixXd &Xsig_aug, double_t delta_t){
   /**
    * Test only
    */
-  delta_t = 0.1;
+//  delta_t = 0.1;
   VectorXd p_x = Xsig_aug.row(0);
   VectorXd p_y = Xsig_aug.row(1);
   VectorXd v = Xsig_aug.row(2);
@@ -169,7 +170,7 @@ void FusionUKF::_MotionPrediction(MatrixXd &Xsig_aug, double_t delta_t){
 
   for (int i = 0; i < vec_len; i+=1) {
     //avoid division by zero
-    if (fabs(yawd(i)) > 0.001) {
+    if (fabs(yawd(i)) > threshold) {
       px_p(i) = p_x(i) + v(i)/yawd(i) * ( sin (yaw(i) + yawd(i)*delta_t) - sin(yaw(i)));
       py_p(i) = p_y(i) + v(i)/yawd(i) * ( cos(yaw(i)) - cos(yaw(i)+yawd(i)*delta_t) );
     }

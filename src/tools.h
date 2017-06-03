@@ -30,6 +30,8 @@ public:
   VectorXd NormalizeAngleVec(VectorXd &z_diff, int dim);
 
   MatrixXd Cart2Polar(const MatrixXd &Xsig);
+
+  double_t GetTimeDiff(long long curr_time, long long prev_time);
 };
 
 #endif /* TOOLS_H_ */

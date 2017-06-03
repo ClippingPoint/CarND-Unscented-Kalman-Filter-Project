@@ -31,12 +31,6 @@ FusionUKF::FusionUKF() {
   //std_yawdd_ = 0.2;
   std_yawdd_ = 0.9;
 
-  // Laser measurement noise standard deviation position1 in m
-  std_laspx_ = 0.15;
-
-  // Laser measurement noise standard deviation position2 in m
-  std_laspy_ = 0.15;
-
   // Radar measurement noise standard deviation radius in m
   std_radr_ = 0.3;
 
@@ -272,7 +266,7 @@ MatrixXd FusionUKF::_GetCrossCovariance(MatrixXd &X_diff, MatrixXd &Z_diff) {
   return X_diff * weights_.asDiagonal() * Z_diff.transpose();
 }
 
-void FusionUKF::_PredictRadar(double_t delta_t) {
+void FusionUKF::PredictRadar(double_t delta_t) {
   MatrixXd Xsig_aug = _GenerateSigmaPoints();
   _MotionPrediction(Xsig_aug, delta_t);
 
@@ -286,7 +280,7 @@ void FusionUKF::_PredictRadar(double_t delta_t) {
 
 }
 
-void FusionUKF::_UpdateRadar(MeasurementPackage meas_package) {
+void FusionUKF::UpdateRadar(MeasurementPackage meas_package) {
   VectorXd z_pred = VectorXd::Zero(n_z_);
   MatrixXd S = MatrixXd::Zero(n_z_, n_z_);
   MatrixXd Zsig = tools.Cart2Polar(Xsig_pred_);

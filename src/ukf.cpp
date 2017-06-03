@@ -11,15 +11,7 @@ using std::vector;
  * Initializes Unscented Kalman filter
  */
 UKF::UKF() {
-  // if this is false, laser measurements will be ignored (except during init)
-  use_laser_ = true;
-
-  // if this is false, radar measurements will be ignored (except during init)
-  use_radar_ = true;
-
   /**
-  TODO:
-
   Complete the initialization. See ukf.h for other member properties.
 
   Hint: one or more values initialized above might be wildly off...
@@ -136,7 +128,7 @@ void UKF::_PredictRadar(double_t delta_t) {
   }
   fusionUKF.SetState(x_);
   fusionUKF.SetProcessMatrix(P_);
-  fusionUKF._PredictRadar(delta_t);
+  fusionUKF.PredictRadar(delta_t);
 }
 
 /**
@@ -165,7 +157,7 @@ void UKF::_UpdateRadar(MeasurementPackage meas_package) {
 
   You'll also need to calculate the radar NIS.
   */
-  fusionUKF._UpdateRadar(meas_package);
+  fusionUKF.UpdateRadar(meas_package);
   x_ = fusionUKF.GetState();
   P_ = fusionUKF.GetProcessMatrix();
 }

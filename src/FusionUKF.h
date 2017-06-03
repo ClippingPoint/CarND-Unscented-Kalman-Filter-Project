@@ -19,6 +19,7 @@ public:
 
   MatrixXd P_;
 
+  ///* predicted sigma points matrix
   MatrixXd Xsig_pred_;
 
   // Cache intermediate results
@@ -30,28 +31,34 @@ public:
 
   MatrixXd Z_diff_;
 
+  ///* Process noise standard deviation longitudinal acceleration in m/s^2
   double_t std_a_;
 
+  ///* Process noise standard deviation yaw acceleration in rad/s^2
   double_t std_yawdd_;
 
-  double_t std_laspx_;
-
-  double_t std_laspy_;
-
+  ///* Radar measurement noise standard deviation radius in m
   double_t std_radr_;
 
+  ///* Radar measurement noise standard deviation angle in rad
   double_t std_radphi_;
 
+  ///* Radar measurement noise standard deviation radius change in m/s
   double_t std_radrd_;
 
+  ///* Weights of sigma points
   VectorXd weights_;
 
+  ///* State dimension
   int n_x_;
 
+  ///* Augmented state dimension
   int n_aug_;
 
+  ///* Observation dimension
   int n_z_;
 
+  ///* Sigma point spreading parameter
   double_t lambda_;
 
   /**
@@ -71,9 +78,15 @@ public:
   VectorXd GetState();
   MatrixXd GetProcessMatrix();
 
-  void _PredictRadar(double_t delta_t);
+  /**
+   * @param delta_t
+   */
+  void PredictRadar(double_t delta_t);
 
-  void _UpdateRadar(const MeasurementPackage meas_package);
+  /**
+   * @param meas_package
+   */
+  void UpdateRadar(const MeasurementPackage meas_package);
 
 private:
   Tools tools;

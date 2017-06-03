@@ -68,7 +68,8 @@ void FusionUKF::Init(MeasurementPackage meas_package) {
   x_set(4) = 0.3528;
   SetState(x_set);
   MatrixXd P_set = MatrixXd::Identity(n_x_, n_x_);
-/*  P_set << 0.0043, -0.0013, 0.0030, -0.0022, -0.0020,
+  /*MatrixXd P_set = MatrixXd::Zero(n_x_, n_x_);
+  P_set << 0.0043, -0.0013, 0.0030, -0.0022, -0.0020,
         -0.0013, 0.0077, 0.0011, 0.0071, 0.0060,
         0.0030, 0.0011, 0.0054, 0.0007, 0.0008,
         -0.0022, 0.0071, 0.0007, 0.0098, 0.0010,

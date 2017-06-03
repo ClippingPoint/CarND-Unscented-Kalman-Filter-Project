@@ -1,8 +1,5 @@
 #include "kf.h"
 #include <iostream>
-#include "kf.h"
-#include "tools.h"
-#include "Eigen/Dense"
 
 using namespace std;
 using Eigen::MatrixXd;

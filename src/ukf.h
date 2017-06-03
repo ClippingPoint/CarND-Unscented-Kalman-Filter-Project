@@ -86,32 +86,42 @@ public:
    */
   void ProcessMeasurement(MeasurementPackage meas_package);
 
-  /**
-   * Prediction Predicts sigma points, the state, and the state covariance
-   * matrix
-   * @param delta_t Time between k and k+1 in s
-   */
-  void Prediction(double delta_t);
-
-  /**
-   * Updates the state and the state covariance matrix using a laser measurement
-   * @param meas_package The measurement at k+1
-   */
-  void UpdateLidar(MeasurementPackage meas_package);
-  /**
-   * Updates the state and the state covariance matrix using a radar measurement
-   * @param meas_package The measurement at k+1
-   */
-  void UpdateRadar(MeasurementPackage meas_package);
-
 private:
   FusionUKF fusionUKF;
 
   Tools tools;
 
-  MeasurementPackage::SensorType GetSensorType(
+  MeasurementPackage::SensorType _GetSensorType(
           const MeasurementPackage &measurement_pack
   );
+
+  void _UseLidar(MeasurementPackage meas_package, double_t delta_t);
+
+  void _UseRadar(MeasurementPackage meas_package, double_t delta_t);
+
+  /**
+   * Prediction step for Lidar
+   * @param delta_t
+   */
+  void _PredictLidar(double_t delta_t);
+
+  /**
+   * Prediction Predicts sigma points, the state, and the state covariance
+   * matrix for Radar
+   * @param delta_t Time between k and k+1 in s
+   */
+  void _PredictRadar(double_t delta_t);
+
+  /**
+   * Updates the state and the state covariance matrix using a laser measurement
+   * @param meas_package The measurement at k+1
+   */
+  void _UpdateLidar(MeasurementPackage meas_package);
+  /**
+   * Updates the state and the state covariance matrix using a radar measurement
+   * @param meas_package The measurement at k+1
+   */
+  void _UpdateRadar(MeasurementPackage meas_package);
 };
 
 #endif /* UKF_H */

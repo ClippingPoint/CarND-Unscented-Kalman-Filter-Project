@@ -51,8 +51,6 @@ FusionUKF::FusionUKF() {
   // Radar
   n_z_ = 3;
 
-//  time_us_ = 0;
-
   weights_ = _GenerateWeights(n_aug_);
 }
 

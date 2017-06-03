@@ -47,7 +47,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   Complete this function! Make sure you switch between lidar and radar
   measurements.
   */
-  MeasurementPackage::SensorType sensorType = GetSensorType(meas_package);
+  MeasurementPackage::SensorType sensorType = _GetSensorType(meas_package);
+
   /**
    * TODO: Refactor initialization assignment
    * Polar to Cart position initialization
@@ -73,36 +74,66 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   // in seconds
   double_t delta_t = tools.GetTimeDiff(meas_package.timestamp_, time_us_);
   time_us_ = meas_package.timestamp_;
-  double_t threshold = 1e-3;
 
   switch (sensorType) {
     case MeasurementPackage::RADAR:
+      _UseRadar(meas_package, delta_t);
       break;
     case MeasurementPackage::LASER:
       return;
-//      break;
+      _UseLidar(meas_package, delta_t);
+      break;
     default:
       break;
   }
-  if (delta_t >= threshold) {
-    Prediction(delta_t);
-  }
+  std::cout << "x_out:" << x_ << std::endl;
+  std::cout << "P_out:" << P_ << std::endl;
+}
 
-  UpdateRadar(meas_package);
+// TODO: Refactor below two functions?
+/**
+ * @param meas_package
+ * @param delta_t
+ */
+void UKF::_UseLidar(MeasurementPackage meas_package, double_t delta_t) {
+  _PredictLidar(delta_t);
+  _UpdateLidar(meas_package);
+}
+
+/**
+ * @param meas_package
+ * @param delta_t
+ */
+void UKF::_UseRadar(MeasurementPackage meas_package, double_t delta_t){
+  _PredictRadar(delta_t);
+  _UpdateRadar(meas_package);
+}
+
+/**
+ * Prediction step for Lidar
+ * @param delta_t
+ */
+void UKF::_PredictLidar(double_t delta_t) {
+  double_t threshold = 1e-3;
+  if (delta_t <= threshold) {
+    return;
+  }
 }
 
 /**
  * Predicts sigma points, the state, and the state covariance matrix.
- * @param {double} delta_t the change in time (in seconds) between the last
+ * @param {double_t} delta_t the change in time (in seconds) between the last
  * measurement and this one.
  */
-void UKF::Prediction(double delta_t) {
+void UKF::_PredictRadar(double_t delta_t) {
   /**
-  TODO:
-
   Complete this function! Estimate the object's location. Modify the state
   vector, x_. Predict sigma points, the state, and the state covariance matrix.
   */
+  double_t threshold = 1e-3;
+  if (delta_t <= threshold) {
+    return;
+  }
   fusionUKF.SetState(x_);
   fusionUKF.SetProcessMatrix(P_);
   fusionUKF._PredictRadar(delta_t);
@@ -112,7 +143,7 @@ void UKF::Prediction(double delta_t) {
  * Updates the state and the state covariance matrix using a laser measurement.
  * @param {MeasurementPackage} meas_package
  */
-void UKF::UpdateLidar(MeasurementPackage meas_package) {
+void UKF::_UpdateLidar(MeasurementPackage meas_package) {
   /**
   TODO:
 
@@ -127,10 +158,8 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
  * Updates the state and the state covariance matrix using a radar measurement.
  * @param {MeasurementPackage} meas_package
  */
-void UKF::UpdateRadar(MeasurementPackage meas_package) {
+void UKF::_UpdateRadar(MeasurementPackage meas_package) {
   /**
-  TODO:
-
   Complete this function! Use radar data to update the belief about the object's
   position. Modify the state vector, x_, and covariance, P_.
 
@@ -139,12 +168,9 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   fusionUKF._UpdateRadar(meas_package);
   x_ = fusionUKF.GetState();
   P_ = fusionUKF.GetProcessMatrix();
-
-  std::cout << "x_out:" << x_ << std::endl;
-  std::cout << "P_out:" << P_ << std::endl;
 }
 
-MeasurementPackage::SensorType UKF::GetSensorType(
+MeasurementPackage::SensorType UKF::_GetSensorType(
         const MeasurementPackage &measurement_pack) {
   return measurement_pack.sensor_type_;
 }

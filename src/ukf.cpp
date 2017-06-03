@@ -132,6 +132,9 @@ void UKF::Prediction(double delta_t) {
   Complete this function! Estimate the object's location. Modify the state
   vector, x_. Predict sigma points, the state, and the state covariance matrix.
   */
+// TODO: take x_ P_
+  fusionUKF.x_ = x_;
+  fusionUKF.P_ = P_;
   MatrixXd Xsig_aug = fusionUKF._GenerateSigmaPoints();
   fusionUKF._MotionPrediction(Xsig_aug, delta_t);
   VectorXd x_pred = VectorXd::Zero(n_aug_);

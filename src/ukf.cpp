@@ -24,6 +24,8 @@ UKF::UKF() {
 
   Hint: one or more values initialized above might be wildly off...
   */
+  n_x_ = 5;
+
   is_initialized_ = false;
 
   x_ = VectorXd::Zero(n_x_);

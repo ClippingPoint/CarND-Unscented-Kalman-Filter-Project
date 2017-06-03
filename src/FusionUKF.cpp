@@ -24,10 +24,12 @@ FusionUKF::FusionUKF() {
   Xsig_pred_ = MatrixXd::Zero(n_x_, 2 * n_aug_ + 1);
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 0.2;
+  //std_a_ = 0.2;
+  std_a_ = 0.6;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 0.2;
+  //std_yawdd_ = 0.2;
+  std_yawdd_ = 0.9;
 
   // Laser measurement noise standard deviation position1 in m
   std_laspx_ = 0.15;
@@ -67,18 +69,18 @@ void FusionUKF::Init(MeasurementPackage meas_package) {
   x_(3) = 0.5015;
   x_(4) = 0.3528;*/
   VectorXd x_set = VectorXd::Zero(n_x_);
-  x_set(0) = tools.Polar2Cart(meas_package)(1);
+  x_set(0) = tools.Polar2Cart(meas_package)(0);
   x_set(1) = tools.Polar2Cart(meas_package)(1);
   x_set(2) = 2.2049;
   x_set(3) = 0.5015;
   x_set(4) = 0.3528;
   SetState(x_set);
-  MatrixXd P_set = MatrixXd::Zero(n_x_, n_x_);
-  P_set << 0.0043, -0.0013, 0.0030, -0.0022, -0.0020,
+  MatrixXd P_set = MatrixXd::Identity(n_x_, n_x_);
+/*  P_set << 0.0043, -0.0013, 0.0030, -0.0022, -0.0020,
         -0.0013, 0.0077, 0.0011, 0.0071, 0.0060,
         0.0030, 0.0011, 0.0054, 0.0007, 0.0008,
         -0.0022, 0.0071, 0.0007, 0.0098, 0.0010,
-        -0.0020, 0.0060, 0.0008, 0.0100, 0.0123;
+        -0.0020, 0.0060, 0.0008, 0.0100, 0.0123;*/
   SetProcessMatrix(P_set);
 }
 

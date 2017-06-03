@@ -66,7 +66,6 @@ void FusionUKF::Init(MeasurementPackage meas_package) {
   x_(2) = 2.2049;
   x_(3) = 0.5015;
   x_(4) = 0.3528;*/
-
   VectorXd x_set = VectorXd::Zero(n_x_);
   x_set(0) = tools.Polar2Cart(meas_package)(1);
   x_set(1) = tools.Polar2Cart(meas_package)(1);
@@ -92,15 +91,19 @@ VectorXd FusionUKF::_GenerateWeights(int dim) {
 }
 
 void FusionUKF::SetState(const VectorXd &x_set) {
-  /*
-   * Test only
-   */
   x_ = x_set;
-
 }
 
 void FusionUKF::SetProcessMatrix(const MatrixXd &P_set) {
   P_ = P_set;
+}
+
+VectorXd FusionUKF::GetState() {
+  return x_;
+}
+
+MatrixXd FusionUKF::GetProcessMatrix() {
+  return P_;
 }
 
 void FusionUKF::_AugmentStateAndProcess(VectorXd *x_out, MatrixXd *P_out) {
@@ -269,10 +272,46 @@ MatrixXd FusionUKF::_GetCrossCovariance(MatrixXd &X_diff, MatrixXd &Z_diff) {
   return X_diff * weights_.asDiagonal() * Z_diff.transpose();
 }
 
-void FusionUKF::_PredictRadar(double_t delta_t) {
+void FusionUKF::_PredictRadar(double_t delta_t,
+                              const VectorXd &x_set, const MatrixXd &P_set) {
+  SetState(x_set);
+  SetProcessMatrix(P_set);
+  MatrixXd Xsig_aug = _GenerateSigmaPoints();
+  _MotionPrediction(Xsig_aug, delta_t);
+
+  VectorXd x_pred = VectorXd::Zero(n_aug_);
+  MatrixXd P_pred = MatrixXd::Zero(n_aug_, n_aug_);
+  X_diff_ = _PredictMeanAndCovariance(&x_pred, &P_pred,
+                                     3, Xsig_pred_);
+
+  x_pred_ = x_pred;
+  P_pred_ = P_pred;
 
 }
 
-void FusionUKF::UpdateRadar(MeasurementPackage meas_package) {
+void FusionUKF::_UpdateRadar(MeasurementPackage meas_package) {
+  VectorXd z_pred = VectorXd::Zero(n_z_);
+  MatrixXd S = MatrixXd::Zero(n_z_, n_z_);
+  MatrixXd Zsig = tools.Cart2Polar(Xsig_pred_);
+  Z_diff_ = _PredictMeanAndCovariance(&z_pred, &S, 1, Zsig);
+  _PropagateNoise(&S);
+
+  // Kalman Update Process
+  MatrixXd Tc = _GetCrossCovariance(X_diff_, Z_diff_);
+  MatrixXd K = Tc * S.inverse();
+  /**
+   * Test only
+   */
+/*  VectorXd z = VectorXd::Zero(n_z_);
+  z << 5.9214, 0.2187, 2.0062;*/
+  VectorXd z_diff = meas_package.raw_measurements_ - z_pred;
+  // angle normalization
+  z_diff = tools.NormalizeAngleVec(z_diff, 1);
+
+  VectorXd x = x_pred_ + K * z_diff;
+  MatrixXd P = P_pred_ - K * S * K.transpose();
+
+  SetState(x);
+  SetProcessMatrix(P);
 }
 

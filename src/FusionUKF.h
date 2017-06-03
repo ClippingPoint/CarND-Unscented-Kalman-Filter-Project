@@ -24,13 +24,13 @@ public:
   MatrixXd Xsig_pred_;
 
   // Cache intermediate results
-  MatrixXd x_pred;
+  MatrixXd x_pred_;
 
-  MatrixXd P_pred;
+  MatrixXd P_pred_;
 
-  MatrixXd X_diff;
+  MatrixXd X_diff_;
 
-  MatrixXd Z_diff;
+  MatrixXd Z_diff_;
 
   long long time_us_;
 
@@ -68,11 +68,22 @@ public:
    */
   virtual ~FusionUKF();
 
-  void UpdateRadar(MeasurementPackage meas_package);
-
   void Init(MeasurementPackage meas_package);
+
   void SetState(const VectorXd &x_set);
   void SetProcessMatrix(const MatrixXd &P_set);
+  VectorXd GetState();
+  MatrixXd GetProcessMatrix();
+
+  void _PredictRadar(double_t delta_t,
+                     const VectorXd &x_set, const MatrixXd &P_set);
+
+  void _UpdateRadar(const MeasurementPackage meas_package);
+
+private:
+  Tools tools;
+
+  VectorXd _GenerateWeights(int dim);
 
   MatrixXd _GenerateSigmaPoints();
 
@@ -89,14 +100,7 @@ public:
 
   MatrixXd _GetCrossCovariance(MatrixXd &X_diff, MatrixXd &Z_diff);
 
-private:
-  Tools tools;
-
-  VectorXd _GenerateWeights(int dim);
-
   void _AugmentStateAndProcess(VectorXd *x_out, MatrixXd* P_out);
-
-  void _PredictRadar(double_t delta_t);
 };
 
 

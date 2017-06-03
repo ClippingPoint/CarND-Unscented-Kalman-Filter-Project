@@ -23,21 +23,28 @@ FusionUKF::FusionUKF() {
 
   Xsig_pred_ = MatrixXd::Zero(n_x_, 2 * n_aug_ + 1);
 
+  // Process noise standard deviation longitudinal acceleration in m/s^2
   std_a_ = 0.2;
 
+  // Process noise standard deviation yaw acceleration in rad/s^2
   std_yawdd_ = 0.2;
 
+  // Laser measurement noise standard deviation position1 in m
   std_laspx_ = 0.15;
 
+  // Laser measurement noise standard deviation position2 in m
   std_laspy_ = 0.15;
 
+  // Radar measurement noise standard deviation radius in m
   std_radr_ = 0.3;
 
-//  std_radphi_ = 0.03;
-  std_radphi_ = 0.0175;
+  // Radar measurement noise standard deviation angle in rad
+  std_radphi_ = 0.03;
+//  std_radphi_ = 0.0175;
 
-//  std_radrd_ = 0.3;
-  std_radrd_ = 0.1;
+  // Radar measurement noise standard deviation radius change in m/s
+  std_radrd_ = 0.3;
+//  std_radrd_ = 0.1;
 
   // Radar
   n_z_ = 3;
@@ -51,8 +58,29 @@ FusionUKF::~FusionUKF() {}
 
 
 void FusionUKF::Init(MeasurementPackage meas_package) {
-  _InitState(meas_package);
-  _InitProcessMatrix();
+  /**
+   * Test only
+   */
+  /*x_(0) = 5.7441;
+  x_(1) = 1.3800;
+  x_(2) = 2.2049;
+  x_(3) = 0.5015;
+  x_(4) = 0.3528;*/
+
+  VectorXd x_set = VectorXd::Zero(n_x_);
+  x_set(0) = tools.Polar2Cart(meas_package)(1);
+  x_set(1) = tools.Polar2Cart(meas_package)(1);
+  x_set(2) = 2.2049;
+  x_set(3) = 0.5015;
+  x_set(4) = 0.3528;
+  SetState(x_set);
+  MatrixXd P_set = MatrixXd::Zero(n_x_, n_x_);
+  P_set << 0.0043, -0.0013, 0.0030, -0.0022, -0.0020,
+        -0.0013, 0.0077, 0.0011, 0.0071, 0.0060,
+        0.0030, 0.0011, 0.0054, 0.0007, 0.0008,
+        -0.0022, 0.0071, 0.0007, 0.0098, 0.0010,
+        -0.0020, 0.0060, 0.0008, 0.0100, 0.0123;
+  SetProcessMatrix(P_set);
 }
 
 
@@ -63,31 +91,16 @@ VectorXd FusionUKF::_GenerateWeights(int dim) {
   return weights;
 }
 
-void FusionUKF::_InitState(MeasurementPackage meas_package) {
-  x_.fill(0.0);
-  // x_(0) = 5.7441
-  // x_(1) = 1.3800
-  x_(0) = tools.Polar2Cart(meas_package)(1);
-  x_(1) = tools.Polar2Cart(meas_package)(1);
-  x_(2) = 2.2049;
-  x_(3) = 0.5015;
-  x_(4) = 0.3528;
-  /**
+void FusionUKF::SetState(const VectorXd &x_set) {
+  /*
    * Test only
    */
-  /*x_(0) = 5.7441;
-  x_(1) = 1.3800;
-  x_(2) = 2.2049;
-  x_(3) = 0.5015;
-  x_(4) = 0.3528;*/
+  x_ = x_set;
+
 }
 
-void FusionUKF::_InitProcessMatrix() {
-  P_ << 0.0043, -0.0013, 0.0030, -0.0022, -0.0020,
-        -0.0013, 0.0077, 0.0011, 0.0071, 0.0060,
-        0.0030, 0.0011, 0.0054, 0.0007, 0.0008,
-        -0.0022, 0.0071, 0.0007, 0.0098, 0.0010,
-        -0.0020, 0.0060, 0.0008, 0.0100, 0.0123;
+void FusionUKF::SetProcessMatrix(const MatrixXd &P_set) {
+  P_ = P_set;
 }
 
 void FusionUKF::_AugmentStateAndProcess(VectorXd *x_out, MatrixXd *P_out) {
@@ -120,7 +133,7 @@ MatrixXd FusionUKF::_GenerateSigmaPoints() {
   MatrixXd L = P_aug.llt().matrixL();
 
   // create augmented sigma points
-  MatrixXd Xsig_aug = MatrixXd(n_aug_, 2 * n_aug_ + 1);
+  MatrixXd Xsig_aug = MatrixXd::Zero(n_aug_, 2 * n_aug_ + 1);
 
 //  MatrixXd row_vector = MatrixXd::Ones(1, n_aug_);
 //  Column duplication
@@ -254,6 +267,10 @@ void FusionUKF::_PropagateNoise(MatrixXd *S) {
  */
 MatrixXd FusionUKF::_GetCrossCovariance(MatrixXd &X_diff, MatrixXd &Z_diff) {
   return X_diff * weights_.asDiagonal() * Z_diff.transpose();
+}
+
+void FusionUKF::_PredictRadar(double_t delta_t) {
+
 }
 
 void FusionUKF::UpdateRadar(MeasurementPackage meas_package) {

@@ -71,6 +71,8 @@ public:
   void UpdateRadar(MeasurementPackage meas_package);
 
   void Init(MeasurementPackage meas_package);
+  void SetState(const VectorXd &x_set);
+  void SetProcessMatrix(const MatrixXd &P_set);
 
   MatrixXd _GenerateSigmaPoints();
 
@@ -92,11 +94,9 @@ private:
 
   VectorXd _GenerateWeights(int dim);
 
-  void _InitState(MeasurementPackage meas_package);
-
-  void _InitProcessMatrix();
-
   void _AugmentStateAndProcess(VectorXd *x_out, MatrixXd* P_out);
+
+  void _PredictRadar(double_t delta_t);
 };
 
 

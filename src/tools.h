@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 #include "Eigen/Dense"
+#include "measurement_package.h"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -30,6 +31,8 @@ public:
   VectorXd NormalizeAngleVec(VectorXd &z_diff, int dim);
 
   MatrixXd Cart2Polar(const MatrixXd &Xsig);
+
+  VectorXd Polar2Cart(const MeasurementPackage &meas_package);
 
   double_t GetTimeDiff(long long curr_time, long long prev_time);
 };

@@ -58,10 +58,10 @@ UKF::UKF() {
 
   // Radar
   // initial state vector
-  x_ = VectorXd::Zero(n_aug_);
+  x_ = VectorXd::Zero(n_x_);
 
   // initial covariance matrix
-  P_ = MatrixXd::Zero(n_aug_, n_aug_);
+  P_ = MatrixXd::Zero(n_x_, n_x_);
 }
 
 UKF::~UKF() {}
@@ -200,14 +200,16 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   // angle normalization
   z_diff = tools.NormalizeAngleVec(z_diff, 1);
 
-  std::cout << "z_diff" << std::endl << z_diff << std::endl;
+/*  std::cout << "z_diff" << std::endl << z_diff << std::endl;
   std::cout << "K" << std::endl << K << std::endl;
-
+*/
   // update state mean and covariance matrix
   fusionUKF.x_ = fusionUKF.x_pred + K * z_diff;
   fusionUKF.P_ = fusionUKF.P_pred - K * S * K.transpose();
-  std::cout << "x_" << fusionUKF.x_ << std::endl;
+
+/*  std::cout << "x_" << fusionUKF.x_ << std::endl;
   std::cout << "P_:" << fusionUKF.P_ << std::endl;
+  */
   x_ = fusionUKF.x_;
   P_ = fusionUKF.P_;
 

@@ -86,6 +86,7 @@ public:
   void _PropagateNoise(MatrixXd *S);
 
   MatrixXd _GetCrossCovariance(MatrixXd &X_diff, MatrixXd &Z_diff);
+
 private:
   Tools tools;
 

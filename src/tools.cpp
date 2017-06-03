@@ -101,6 +101,19 @@ MatrixXd Tools::Cart2Polar(const MatrixXd &Xsig) {
   return H_x;
 }
 
+VectorXd Tools::Polar2Cart(const MeasurementPackage &meas_package) {
+  double_t ro = meas_package.raw_measurements_[0];
+  double_t theta = meas_package.raw_measurements_[1];
+//  double_t ro_dot = meas_package.raw_measurements_[2];
+
+  double_t px = ro*cos(theta);
+  double_t py = ro*sin(theta);
+
+  VectorXd radar_cart_x(4);
+  radar_cart_x << px, py, 0, 0;
+  return radar_cart_x;
+}
+
 /**
  * Time diff in seconds
  * @param curr_time

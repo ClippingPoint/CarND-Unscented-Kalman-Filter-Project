@@ -67,8 +67,8 @@ void FusionUKF::_InitState(MeasurementPackage meas_package) {
   x_.fill(0.0);
   // x_(0) = 5.7441
   // x_(1) = 1.3800
-  x_(0) = meas_package.raw_measurements_[0];
-  x_(1) = meas_package.raw_measurements_[1];
+  x_(0) = tools.Polar2Cart(meas_package)(1);
+  x_(1) = tools.Polar2Cart(meas_package)(1);
   x_(2) = 2.2049;
   x_(3) = 0.5015;
   x_(4) = 0.3528;

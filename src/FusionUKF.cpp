@@ -33,9 +33,11 @@ FusionUKF::FusionUKF() {
 
   std_radr_ = 0.3;
 
-  std_radphi_ = 0.03;
+//  std_radphi_ = 0.03;
+  std_radphi_ = 0.0175;
 
-  std_radrd_ = 0.3;
+//  std_radrd_ = 0.3;
+  std_radrd_ = 0.1;
 
   // Radar
   n_z_ = 3;

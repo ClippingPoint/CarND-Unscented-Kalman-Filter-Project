@@ -52,6 +52,7 @@ UKF::UKF() {
   n_x_ = 5;
   n_aug_ = 7;
   lambda_ = 3;
+  n_z_ = 3;
 
   is_initialized_ = false;
 
@@ -137,10 +138,7 @@ void UKF::Prediction(double delta_t) {
   MatrixXd P_pred = MatrixXd::Zero(n_aug_, n_aug_);
   fusionUKF.X_diff = fusionUKF._PredictMeanAndCovariance(&x_pred, &P_pred,
                                                         3, fusionUKF.Xsig_pred_);
-  std::cout << "Xsig_pred_:" << fusionUKF.Xsig_pred_ << std::endl;
-  std::cout << "Weights:" << fusionUKF.weights_ << std::endl;
-  std::cout << "x_pred:" << x_pred << std::endl;
-  std::cout << "P_pred:" << P_pred << std::endl;
+
   fusionUKF.x_pred = x_pred;
   fusionUKF.P_pred = P_pred;
 }
@@ -158,26 +156,6 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
 
   You'll also need to calculate the lidar NIS.
   */
-  VectorXd z_pred = VectorXd::Zero(n_z_);
-  MatrixXd S = MatrixXd::Zero(n_z_, n_z_);
-  MatrixXd Zsig = tools.Cart2Polar(fusionUKF.Xsig_pred_);
-  MatrixXd Z_diff = fusionUKF._PredictMeanAndCovariance(&z_pred, &S, 1, Zsig);
-  fusionUKF._PropagateNoise(&S);
-  fusionUKF.Z_diff = Z_diff;
-//  Kalman Process
-  MatrixXd Tc = fusionUKF._GetCrossCovariance(fusionUKF.X_diff, fusionUKF.Z_diff);
-  MatrixXd K = Tc * S.inverse();
-  VectorXd z_diff = meas_package.raw_measurements_ - z_pred;
-
-  // angle normalization
-  z_diff = tools.NormalizeAngleVec(z_diff, 1);
-
-  // update state mean and covariance matrix
-  fusionUKF.x_ = fusionUKF.x_ + K * z_diff;
-  fusionUKF.P_ = fusionUKF.P_ - K * S * K.transpose();
-
-  x_ = fusionUKF.x_;
-  P_ = fusionUKF.P_;
 }
 
 /**
@@ -193,6 +171,45 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
   You'll also need to calculate the radar NIS.
   */
+  VectorXd z_pred = VectorXd::Zero(n_z_);
+  MatrixXd S = MatrixXd::Zero(n_z_, n_z_);
+  MatrixXd Zsig = tools.Cart2Polar(fusionUKF.Xsig_pred_);
+  MatrixXd Z_diff = fusionUKF._PredictMeanAndCovariance(&z_pred, &S, 1, Zsig);
+
+  fusionUKF._PropagateNoise(&S);
+
+  fusionUKF.Z_diff = Z_diff;
+//  Kalman Update Process
+  MatrixXd Tc = fusionUKF._GetCrossCovariance(fusionUKF.X_diff, fusionUKF.Z_diff);
+  MatrixXd K = Tc * S.inverse();
+  /**
+   * Test only
+   */
+  //VectorXd z_diff = meas_package.raw_measurements_ - z_pred;
+  VectorXd z = VectorXd::Zero(n_z_);
+  z << 5.9214, 0.2187, 2.0062;
+//  VectorXd z_diff = meas_package.raw_measurements_ - z_pred;
+  VectorXd z_diff = z - z_pred;
+
+  std::cout << "Tc" << std::endl << Tc << std::endl;
+  std::cout << "Xsig_pred" << std::endl << fusionUKF.Xsig_pred_ << std::endl;
+
+  // angle normalization
+  z_diff = tools.NormalizeAngleVec(z_diff, 1);
+
+  std::cout << "z_diff" << std::endl << z_diff << std::endl;
+  std::cout << "K" << std::endl << K << std::endl;
+
+  // update state mean and covariance matrix
+  fusionUKF.x_ = fusionUKF.x_pred + K * z_diff;
+  fusionUKF.P_ = fusionUKF.P_pred - K * S * K.transpose();
+  std::cout << "x_" << fusionUKF.x_ << std::endl;
+  std::cout << "P_:" << fusionUKF.P_ << std::endl;
+  x_ = fusionUKF.x_;
+  P_ = fusionUKF.P_;
+
+//  std::cout << "x_out:" << x_ << std::endl;
+//  std::cout << "P_out:" << P_ << std::endl;
 }
 
 MeasurementPackage::SensorType UKF::GetSensorType(

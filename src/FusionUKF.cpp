@@ -272,10 +272,7 @@ MatrixXd FusionUKF::_GetCrossCovariance(MatrixXd &X_diff, MatrixXd &Z_diff) {
   return X_diff * weights_.asDiagonal() * Z_diff.transpose();
 }
 
-void FusionUKF::_PredictRadar(double_t delta_t,
-                              const VectorXd &x_set, const MatrixXd &P_set) {
-  SetState(x_set);
-  SetProcessMatrix(P_set);
+void FusionUKF::_PredictRadar(double_t delta_t) {
   MatrixXd Xsig_aug = _GenerateSigmaPoints();
   _MotionPrediction(Xsig_aug, delta_t);
 

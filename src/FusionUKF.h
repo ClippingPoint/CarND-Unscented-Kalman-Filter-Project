@@ -15,8 +15,6 @@ using Eigen::VectorXd;
 class FusionUKF {
 public:
 
-  bool is_initalized_;
-
   VectorXd x_;
 
   MatrixXd P_;
@@ -31,8 +29,6 @@ public:
   MatrixXd X_diff_;
 
   MatrixXd Z_diff_;
-
-  long long time_us_;
 
   double_t std_a_;
 
@@ -75,8 +71,7 @@ public:
   VectorXd GetState();
   MatrixXd GetProcessMatrix();
 
-  void _PredictRadar(double_t delta_t,
-                     const VectorXd &x_set, const MatrixXd &P_set);
+  void _PredictRadar(double_t delta_t);
 
   void _UpdateRadar(const MeasurementPackage meas_package);
 

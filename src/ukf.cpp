@@ -54,8 +54,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
     switch (sensorType) {
       case MeasurementPackage::RADAR:
         fusionUKF.Init(meas_package);
-        x_ = fusionUKF.x_;
-        P_ = fusionUKF.P_;
+        x_ = fusionUKF.GetState();
+        P_ = fusionUKF.GetProcessMatrix();
         break;
       case MeasurementPackage::LASER:
         return;
@@ -101,7 +101,9 @@ void UKF::Prediction(double delta_t) {
   Complete this function! Estimate the object's location. Modify the state
   vector, x_. Predict sigma points, the state, and the state covariance matrix.
   */
-  fusionUKF._PredictRadar(delta_t, x_, P_);
+  fusionUKF.SetState(x_);
+  fusionUKF.SetProcessMatrix(P_);
+  fusionUKF._PredictRadar(delta_t);
 }
 
 /**

@@ -228,8 +228,7 @@ void FusionUKF::Predict(double_t delta_t) {
 
   VectorXd x_pred = VectorXd::Zero(n_aug_);
   MatrixXd P_pred = MatrixXd::Zero(n_aug_, n_aug_);
-  X_diff_ = _PredictMeanAndCovariance(&x_pred, &P_pred,
-                                     3, Xsig_pred_);
+  X_diff_ = _PredictMeanAndCovariance(&x_pred, &P_pred, 3, Xsig_pred_);
 
   SetState(x_pred);
   SetProcessMatrix(P_pred);

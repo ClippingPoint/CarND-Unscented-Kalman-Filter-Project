@@ -22,11 +22,9 @@ FusionUKF::FusionUKF() {
   Xsig_pred_ = MatrixXd::Zero(n_x_, 2 * n_aug_ + 1);
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  //std_a_ = 0.2;
   std_a_ = 0.6;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  //std_yawdd_ = 0.2;
   std_yawdd_ = 0.9;
 
   // Radar measurement noise standard deviation radius in m
@@ -34,11 +32,9 @@ FusionUKF::FusionUKF() {
 
   // Radar measurement noise standard deviation angle in rad
   std_radphi_ = 0.03;
-//  std_radphi_ = 0.0175;
 
   // Radar measurement noise standard deviation radius change in m/s
   std_radrd_ = 0.3;
-//  std_radrd_ = 0.1;
 
   // Radar
   n_z_ = 3;
@@ -73,11 +69,7 @@ MatrixXd FusionUKF::GetProcessMatrix() {
 
 void FusionUKF::_AugmentStateAndProcess(VectorXd *x_out, MatrixXd *P_out) {
   VectorXd x_aug = VectorXd::Zero(n_aug_);
-  x_aug(0) = x_(0);
-  x_aug(1) = x_(1);
-  x_aug(2) = x_(2);
-  x_aug(3) = x_(3);
-  x_aug(4) = x_(4);
+  x_aug.head(5) = x_;
   x_aug(5) = 0;
   x_aug(6) = 0;
 
@@ -103,12 +95,10 @@ MatrixXd FusionUKF::_GenerateSigmaPoints() {
   // create augmented sigma points
   MatrixXd Xsig_aug = MatrixXd::Zero(n_aug_, 2 * n_aug_ + 1);
 
-//  MatrixXd row_vector = MatrixXd::Ones(1, n_aug_);
-//  Column duplication
+  // Column duplication
   VectorXd row_vector = VectorXd::Ones(n_aug_);
 
   // Outer product
-  //x_mat.noalias() = x_ * row_vector.transpose();
   MatrixXd x_mat = x_aug * row_vector.transpose();
 
   MatrixXd left_block = MatrixXd::Zero(n_aug_, n_aug_);
@@ -128,10 +118,6 @@ MatrixXd FusionUKF::_GenerateSigmaPoints() {
  * @param Xsig_aug
  */
 void FusionUKF::_MotionPrediction(MatrixXd &Xsig_aug, double_t delta_t){
-  /**
-   * Test only
-   */
-//  delta_t = 0.1;
   VectorXd p_x = Xsig_aug.row(0);
   VectorXd p_y = Xsig_aug.row(1);
   VectorXd v = Xsig_aug.row(2);
@@ -175,7 +161,6 @@ void FusionUKF::_MotionPrediction(MatrixXd &Xsig_aug, double_t delta_t){
 
   yaw_p = yaw_p + 0.5*nu_yawdd*delta_t*delta_t;
   yawd_p = yawd_p + nu_yawdd*delta_t;
-  // Element wise operations
   Xsig_pred_.row(0) = px_p;
   Xsig_pred_.row(1) = py_p;
   Xsig_pred_.row(2) = v_p;
@@ -197,7 +182,6 @@ void FusionUKF::_MotionPrediction(MatrixXd &Xsig_aug, double_t delta_t){
 MatrixXd FusionUKF::_PredictMeanAndCovariance(VectorXd *x_out, MatrixXd *P_out,
                                           int norm_dim, MatrixXd &SIG) {
   VectorXd x = SIG * weights_;
-//  auto W?
   MatrixXd W = weights_.asDiagonal();
   // Column Duplication
   VectorXd row_vector = VectorXd::Ones(2 * n_aug_ + 1);
@@ -258,12 +242,10 @@ void FusionUKF::Update(MeasurementPackage meas_package) {
   Z_diff_ = _PredictMeanAndCovariance(&z_pred, &S, 1, Zsig);
   _PropagateNoise(&S);
 
-  // Kalman Update Process
+  // Estimate State
   MatrixXd Tc = _GetCrossCovariance(X_diff_, Z_diff_);
   MatrixXd K = Tc * S.inverse();
-  /**
-   * Test only
-   */
+
   VectorXd z_diff = meas_package.raw_measurements_ - z_pred;
   // angle normalization
   z_diff = tools.NormalizeAngleVec(z_diff, 1);

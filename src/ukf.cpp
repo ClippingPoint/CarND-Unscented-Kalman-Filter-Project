@@ -12,8 +12,6 @@ using std::vector;
 UKF::UKF() {
   /**
   Complete the initialization. See ukf.h for other member properties.
-
-  Hint: one or more values initialized above might be wildly off...
   */
   n_x_ = 5;
 
@@ -21,13 +19,7 @@ UKF::UKF() {
 
   x_ = VectorXd::Zero(n_x_);
 
-  // initial covariance matrix
   P_ = MatrixXd::Identity(n_x_, n_x_);
-  /* P_ << 0.0043, -0.0013, 0.0030, -0.0022, -0.0020,
-        -0.0013, 0.0077, 0.0011, 0.0071, 0.0060,
-        0.0030, 0.0011, 0.0054, 0.0007, 0.0008,
-        -0.0022, 0.0071, 0.0007, 0.0098, 0.0010,
-        -0.0020, 0.0060, 0.0008, 0.0100, 0.0123;*/
 }
 
 UKF::~UKF() {}
@@ -43,37 +35,23 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   */
   MeasurementPackage::SensorType sensorType = _GetSensorType(meas_package);
 
-  /**
-   * TODO: Refactor initialization assignment
-   */
   if(!is_initialized_) {
     switch (sensorType) {
       case MeasurementPackage::RADAR:
         /**
          * Test only
          */
-        /*x_(0) = 5.7441;
-          x_(1) = 1.3800;
-          x_(2) = 2.2049;
-          x_(3) = 0.5015;
-          x_(4) = 0.3528;*/
         x_(0) = tools.Polar2Cart(meas_package)(0);
         x_(1) = tools.Polar2Cart(meas_package)(1);
-        x_(2) = 2.2049;
-        x_(3) = 0.5015;
-        x_(4) = 0.3528;
         fusionUKF.SetState(x_);
         fusionUKF.SetProcessMatrix(P_);
         break;
       case MeasurementPackage::LASER:
-        KF.F_ = MatrixXd::Identity(4, 4);
-        P_(3, 3) = 1000;
-        P_(4, 4) = 1000;
         x_(0) = meas_package.raw_measurements_(0);
         x_(1) = meas_package.raw_measurements_(1);
-        KF.Init(x_, P_);
-        return;
-//        break;
+        KF.SetState(x_);
+        KF.SetProcessMatrix(P_);
+        break;
       default:
         break;
     }
@@ -120,6 +98,11 @@ void UKF::_Prediction(double_t delta_t) {
   fusionUKF.SetState(x_);
   fusionUKF.SetProcessMatrix(P_);
   fusionUKF.Predict(delta_t);
+  x_ = fusionUKF.GetState();
+  P_ = fusionUKF.GetProcessMatrix();
+  // Update Lidar prediction state
+  KF.SetState(x_);
+  KF.SetProcessMatrix(P_);
 }
 
 /**
@@ -128,8 +111,6 @@ void UKF::_Prediction(double_t delta_t) {
  */
 void UKF::_UpdateLidar(MeasurementPackage meas_package) {
   /**
-  TODO:
-
   Complete this function! Use lidar data to update the belief about the object's
   position. Modify the state vector, x_, and covariance, P_.
 

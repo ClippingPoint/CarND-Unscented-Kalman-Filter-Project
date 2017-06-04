@@ -22,11 +22,6 @@ public:
   ///* predicted sigma points matrix
   MatrixXd Xsig_pred_;
 
-  // Cache intermediate results
-  MatrixXd x_pred_;
-
-  MatrixXd P_pred_;
-
   MatrixXd X_diff_;
 
   MatrixXd Z_diff_;

@@ -15,7 +15,7 @@ KF::KF() {
   R_(0, 0) = pow(std_laspx_, 2);
   R_(1, 1) = pow(std_laspy_, 2);
 
-  H_ = MatrixXd::Zero(2, 4);
+  H_ = MatrixXd::Zero(2, 5);
 
   H_(0, 0) = 1;
   H_(1, 1) = 1;
@@ -24,7 +24,7 @@ KF::KF() {
 
   H_k_t = H_k_.transpose();
 
-  I = MatrixXd::Identity(4, 4);
+  I = MatrixXd::Identity(5, 5);
 }
 
 KF::~KF() {}

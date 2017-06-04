@@ -182,6 +182,7 @@ void FusionUKF::_MotionPrediction(MatrixXd &Xsig_aug, double_t delta_t){
   Xsig_pred_.row(3) = yaw_p;
   Xsig_pred_.row(4) = yawd_p;
 }
+
 /**
  *
  * (Xsig_pred_ * w).tranpose()
@@ -246,9 +247,8 @@ void FusionUKF::Predict(double_t delta_t) {
   X_diff_ = _PredictMeanAndCovariance(&x_pred, &P_pred,
                                      3, Xsig_pred_);
 
-  x_pred_ = x_pred;
-  P_pred_ = P_pred;
-
+  SetState(x_pred);
+  SetProcessMatrix(P_pred);
 }
 
 void FusionUKF::Update(MeasurementPackage meas_package) {
@@ -264,14 +264,12 @@ void FusionUKF::Update(MeasurementPackage meas_package) {
   /**
    * Test only
    */
-/*  VectorXd z = VectorXd::Zero(n_z_);
-  z << 5.9214, 0.2187, 2.0062;*/
   VectorXd z_diff = meas_package.raw_measurements_ - z_pred;
   // angle normalization
   z_diff = tools.NormalizeAngleVec(z_diff, 1);
 
-  VectorXd x = x_pred_ + K * z_diff;
-  MatrixXd P = P_pred_ - K * S * K.transpose();
+  VectorXd x = x_ + K * z_diff;
+  MatrixXd P = P_ - K * S * K.transpose();
 
   SetState(x);
   SetProcessMatrix(P);

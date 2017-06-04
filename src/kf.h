@@ -54,6 +54,9 @@ public:
    */
   virtual ~KF();
 
+  void init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
+              MatrixXd &H_in, MatrixXd &R_in, MatrixXd &Q_in);
+
   /**
   * Prediction Predicts the state and the state covariance
   * using the process model

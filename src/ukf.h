@@ -4,6 +4,7 @@
 #include "measurement_package.h"
 #include "Eigen/Dense"
 #include "FusionUKF.h"
+#include "kf.h"
 #include <vector>
 #include <string>
 #include <fstream>
@@ -29,11 +30,6 @@ public:
   ///* State dimension
   int n_x_;
 
-  ///* Laser measurement noise standard deviation position1 in m
-  double_t std_laspx_;
-
-  ///* Laser measurement noise standard deviation position2 in m
-  double_t std_laspy_;
   /**
    * Constructor
    */
@@ -52,6 +48,8 @@ public:
 
 private:
   FusionUKF fusionUKF;
+
+  KF KF;
 
   Tools tools;
 

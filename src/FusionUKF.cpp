@@ -48,34 +48,6 @@ FusionUKF::FusionUKF() {
 
 FusionUKF::~FusionUKF() {}
 
-
-void FusionUKF::Init(MeasurementPackage meas_package) {
-  /**
-   * Test only
-   */
-  /*x_(0) = 5.7441;
-  x_(1) = 1.3800;
-  x_(2) = 2.2049;
-  x_(3) = 0.5015;
-  x_(4) = 0.3528;*/
-  VectorXd x_set = VectorXd::Zero(n_x_);
-  x_set(0) = tools.Polar2Cart(meas_package)(0);
-  x_set(1) = tools.Polar2Cart(meas_package)(1);
-  x_set(2) = 2.2049;
-  x_set(3) = 0.5015;
-  x_set(4) = 0.3528;
-  SetState(x_set);
-  MatrixXd P_set = MatrixXd::Identity(n_x_, n_x_);
-  /*MatrixXd P_set = MatrixXd::Zero(n_x_, n_x_);
-  P_set << 0.0043, -0.0013, 0.0030, -0.0022, -0.0020,
-        -0.0013, 0.0077, 0.0011, 0.0071, 0.0060,
-        0.0030, 0.0011, 0.0054, 0.0007, 0.0008,
-        -0.0022, 0.0071, 0.0007, 0.0098, 0.0010,
-        -0.0020, 0.0060, 0.0008, 0.0100, 0.0123;*/
-  SetProcessMatrix(P_set);
-}
-
-
 VectorXd FusionUKF::_GenerateWeights(int dim) {
   VectorXd weights = VectorXd::Zero(2 * dim + 1);
   weights.fill(0.5/lambda_);
@@ -265,7 +237,7 @@ MatrixXd FusionUKF::_GetCrossCovariance(MatrixXd &X_diff, MatrixXd &Z_diff) {
   return X_diff * weights_.asDiagonal() * Z_diff.transpose();
 }
 
-void FusionUKF::PredictRadar(double_t delta_t) {
+void FusionUKF::Predict(double_t delta_t) {
   MatrixXd Xsig_aug = _GenerateSigmaPoints();
   _MotionPrediction(Xsig_aug, delta_t);
 
@@ -279,7 +251,7 @@ void FusionUKF::PredictRadar(double_t delta_t) {
 
 }
 
-void FusionUKF::UpdateRadar(MeasurementPackage meas_package) {
+void FusionUKF::Update(MeasurementPackage meas_package) {
   VectorXd z_pred = VectorXd::Zero(n_z_);
   MatrixXd S = MatrixXd::Zero(n_z_, n_z_);
   MatrixXd Zsig = tools.Cart2Polar(Xsig_pred_);

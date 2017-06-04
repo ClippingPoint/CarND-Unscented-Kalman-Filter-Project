@@ -44,6 +44,12 @@ public:
   // Identity
   MatrixXd I;
 
+  ///* Laser measurement noise standard deviation position1 in m
+  double_t std_laspx_;
+
+  ///* Laser measurement noise standard deviation position2 in m
+  double_t std_laspy_;
+
   /**
    * Constructor
    */

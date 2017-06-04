@@ -7,6 +7,20 @@ using Eigen::VectorXd;
 using std::vector;
 
 KF::KF() {
+  std_laspx_ = 0.15;
+
+  std_laspy_ = 0.15;
+
+  R_ = MatrixXd::Zero(2, 2);
+  R_(0, 0) = pow(std_laspx_, 2);
+  R_(1, 1) = pow(std_laspy_, 2);
+
+  H_ = MatrixXd::Zero(2, 4);
+
+  H_(0, 0) = 1;
+  H_(1, 1) = 1;
+
+  Q_ = MatrixXd::Zero(4, 4);
 }
 
 KF::~KF() {}
@@ -48,7 +62,6 @@ void KF::UpdateEKF(const VectorXd &z) {
 }
 
 void KF::EstimateState(const Eigen::VectorXd &z_diff) {
-//  MatrixXd Ht = H_k_.transpose();
   MatrixXd S = H_k_ * P_ * H_k_t + R_;
   MatrixXd Si = S.inverse();
   MatrixXd PHt = P_ * H_k_t;

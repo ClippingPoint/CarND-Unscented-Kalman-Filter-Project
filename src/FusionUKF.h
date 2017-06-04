@@ -71,8 +71,6 @@ public:
    */
   virtual ~FusionUKF();
 
-  void Init(MeasurementPackage meas_package);
-
   void SetState(const VectorXd &x_set);
   void SetProcessMatrix(const MatrixXd &P_set);
   VectorXd GetState();
@@ -81,12 +79,12 @@ public:
   /**
    * @param delta_t
    */
-  void PredictRadar(double_t delta_t);
+  void Predict(double_t delta_t);
 
   /**
    * @param meas_package
    */
-  void UpdateRadar(const MeasurementPackage meas_package);
+  void Update(const MeasurementPackage meas_package);
 
 private:
   Tools tools;

@@ -22,7 +22,12 @@ UKF::UKF() {
   x_ = VectorXd::Zero(n_x_);
 
   // initial covariance matrix
-  P_ = MatrixXd::Zero(n_x_, n_x_);
+  P_ = MatrixXd::Identity(n_x_, n_x_);
+  /* P_ << 0.0043, -0.0013, 0.0030, -0.0022, -0.0020,
+        -0.0013, 0.0077, 0.0011, 0.0071, 0.0060,
+        0.0030, 0.0011, 0.0054, 0.0007, 0.0008,
+        -0.0022, 0.0071, 0.0007, 0.0098, 0.0010,
+        -0.0020, 0.0060, 0.0008, 0.0100, 0.0123;*/
 }
 
 UKF::~UKF() {}
@@ -33,8 +38,6 @@ UKF::~UKF() {}
  */
 void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   /**
-  TODO:
-
   Complete this function! Make sure you switch between lidar and radar
   measurements.
   */
@@ -42,16 +45,34 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 
   /**
    * TODO: Refactor initialization assignment
-   * Polar to Cart position initialization
    */
   if(!is_initialized_) {
     switch (sensorType) {
       case MeasurementPackage::RADAR:
-        fusionUKF.Init(meas_package);
-        x_ = fusionUKF.GetState();
-        P_ = fusionUKF.GetProcessMatrix();
+        /**
+         * Test only
+         */
+        /*x_(0) = 5.7441;
+          x_(1) = 1.3800;
+          x_(2) = 2.2049;
+          x_(3) = 0.5015;
+          x_(4) = 0.3528;*/
+        x_(0) = tools.Polar2Cart(meas_package)(0);
+        x_(1) = tools.Polar2Cart(meas_package)(1);
+        x_(2) = 2.2049;
+        x_(3) = 0.5015;
+        x_(4) = 0.3528;
+        fusionUKF.SetState(x_);
+        fusionUKF.SetProcessMatrix(P_);
         break;
       case MeasurementPackage::LASER:
+        KF.F_ = MatrixXd::Identity(4, 4);
+        P_(3, 3) = 1000;
+        P_(4, 4) = 1000;
+        KF.P_ = P_;
+        KF.H_k_ = KF.H_;
+        x_(0) = meas_package.raw_measurements_(0);
+        x_(1) = meas_package.raw_measurements_(1);
         return;
 //        break;
       default:
@@ -127,7 +148,7 @@ void UKF::_PredictRadar(double_t delta_t) {
   }
   fusionUKF.SetState(x_);
   fusionUKF.SetProcessMatrix(P_);
-  fusionUKF.PredictRadar(delta_t);
+  fusionUKF.Predict(delta_t);
 }
 
 /**
@@ -156,7 +177,7 @@ void UKF::_UpdateRadar(MeasurementPackage meas_package) {
 
   You'll also need to calculate the radar NIS.
   */
-  fusionUKF.UpdateRadar(meas_package);
+  fusionUKF.Update(meas_package);
   x_ = fusionUKF.GetState();
   P_ = fusionUKF.GetProcessMatrix();
 }

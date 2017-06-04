@@ -29,21 +29,32 @@ KF::KF() {
 
 KF::~KF() {}
 
-void KF::init(VectorXd &x_in, MatrixXd &P_in) {
+void KF::SetState(VectorXd &x_in) {
   x_= x_in;
+}
+
+void KF::SetProcessMatrix(MatrixXd &P_in) {
   P_ = P_in;
 }
 
+VectorXd KF::GetState() {
+  return x_;
+}
 
-void KF::Update(const VectorXd &z) {
+MatrixXd KF::GetProcessMatrix() {
+  return P_;
+}
+
+void KF::Update(const MeasurementPackage meas_package) {
   /**
     * update the state by using Kalman Filter equations
   */
+  VectorXd z = meas_package.raw_measurements_;
   VectorXd y = z - H_ * x_;
   EstimateState(y);
 }
 
-void KF::EstimateState(const Eigen::VectorXd &z_diff) {
+void KF::EstimateState(const VectorXd &z_diff) {
   MatrixXd S = H_k_ * P_ * H_k_t + R_;
   MatrixXd Si = S.inverse();
   MatrixXd PHt = P_ * H_k_t;

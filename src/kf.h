@@ -1,10 +1,7 @@
-//
-// Created by ian zhang on 6/3/17.
-//
-
 #ifndef UNSCENTEDKF_KF_H
 #define UNSCENTEDKF_KF_H
 
+#include "measurement_package.h"
 #include "Eigen/Dense"
 #include "tools.h"
 
@@ -19,15 +16,6 @@ public:
 
   // state covariance matrix
   MatrixXd P_;
-
-  // state transition matrix
-  MatrixXd F_;
-
-  // state transition matrix transpose for reusing calc result
-  MatrixXd Ft;
-
-  // process covariance matrix
-  MatrixXd Q_;
 
   // measurement matrix
   MatrixXd H_;
@@ -60,13 +48,19 @@ public:
    */
   virtual ~KF();
 
-  void init(VectorXd &x_in, MatrixXd &P_in);
+  void SetState(VectorXd &x_in);
+
+  void SetProcessMatrix(MatrixXd &P_in);
+
+  VectorXd GetState();
+
+  MatrixXd GetProcessMatrix();
 
   /**
    * Updates the state by using standard Kalman Filter equations
    * @param z The measurement at k+1
    */
-  void Update(const Eigen::VectorXd &z);
+  void Update(const MeasurementPackage meas_package);
 
 private:
   Tools tools;
@@ -75,7 +69,7 @@ private:
    * Utility function for code reusing
    * @param z_diff
    */
-  void EstimateState(const Eigen::VectorXd &z_diff);
+  void EstimateState(const VectorXd &z_diff);
 };
 
 

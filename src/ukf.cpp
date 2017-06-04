@@ -71,7 +71,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
         P_(4, 4) = 1000;
         x_(0) = meas_package.raw_measurements_(0);
         x_(1) = meas_package.raw_measurements_(1);
-        KF.init(x_, P_);
+        KF.Init(x_, P_);
         return;
 //        break;
       default:
@@ -136,6 +136,7 @@ void UKF::_UpdateLidar(MeasurementPackage meas_package) {
 
   You'll also need to calculate the lidar NIS.
   */
+  KF.Update(meas_package);
 }
 
 /**

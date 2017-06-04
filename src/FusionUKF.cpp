@@ -1,6 +1,4 @@
 #include "FusionUKF.h"
-#include "Eigen/Dense"
-#include <iostream>
 
 using namespace std;
 using Eigen::MatrixXd;

@@ -57,22 +57,12 @@ private:
           const MeasurementPackage &measurement_pack
   );
 
-  void _UseLidar(MeasurementPackage meas_package, double_t delta_t);
-
-  void _UseRadar(MeasurementPackage meas_package, double_t delta_t);
-
-  /**
-   * Prediction step for Lidar
-   * @param delta_t
-   */
-  void _PredictLidar(double_t delta_t);
-
   /**
    * Prediction Predicts sigma points, the state, and the state covariance
    * matrix for Radar
    * @param delta_t Time between k and k+1 in s
    */
-  void _PredictRadar(double_t delta_t);
+  void _Prediction(double_t delta_t);
 
   /**
    * Updates the state and the state covariance matrix using a laser measurement

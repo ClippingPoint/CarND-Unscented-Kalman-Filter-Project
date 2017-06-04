@@ -60,28 +60,13 @@ public:
    */
   virtual ~KF();
 
-  void init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
-              MatrixXd &H_in, MatrixXd &R_in, MatrixXd &Q_in);
-
-  /**
-  * Prediction Predicts the state and the state covariance
-  * using the process model
-  * @param delta_T Time between k and k+1 in s
-  */
-  void Predict();
+  void init(VectorXd &x_in, MatrixXd &P_in);
 
   /**
    * Updates the state by using standard Kalman Filter equations
    * @param z The measurement at k+1
    */
   void Update(const Eigen::VectorXd &z);
-
-  /**
-   * Updates the state by using Extended Kalman Filter equations
-   * @param z The measurement at k+1
-   */
-  void UpdateEKF(const Eigen::VectorXd &z);
-
 
 private:
   Tools tools;

@@ -20,44 +20,26 @@ KF::KF() {
   H_(0, 0) = 1;
   H_(1, 1) = 1;
 
-  Q_ = MatrixXd::Zero(4, 4);
+  H_k_ = H_;
+
+  H_k_t = H_k_.transpose();
+
+  I = MatrixXd::Identity(4, 4);
 }
 
 KF::~KF() {}
 
-void KF::init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
-              MatrixXd &H_in, MatrixXd &R_in, MatrixXd &Q_in) {
+void KF::init(VectorXd &x_in, MatrixXd &P_in) {
   x_= x_in;
   P_ = P_in;
-  F_ = F_in;
-  H_ = H_in;
-  R_ = R_in;
-  Q_ = Q_in;
 }
 
-void KF::Predict() {
-  /**
-    * predict the state
-  */
-  x_ = F_ * x_;
-  P_ = F_ * P_ * Ft + Q_;
-}
 
 void KF::Update(const VectorXd &z) {
   /**
     * update the state by using Kalman Filter equations
   */
   VectorXd y = z - H_ * x_;
-  EstimateState(y);
-}
-
-void KF::UpdateEKF(const VectorXd &z) {
-  /**
-    * update the state by using Extended Kalman Filter equations
-  */
-  VectorXd y = z - H_;
-
-  y = tools.NormalizeAngleVec(y, 1);
   EstimateState(y);
 }
 

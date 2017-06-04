@@ -69,10 +69,9 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
         KF.F_ = MatrixXd::Identity(4, 4);
         P_(3, 3) = 1000;
         P_(4, 4) = 1000;
-        KF.P_ = P_;
-        KF.H_k_ = KF.H_;
         x_(0) = meas_package.raw_measurements_(0);
         x_(1) = meas_package.raw_measurements_(1);
+        KF.init(x_, P_);
         return;
 //        break;
       default:
@@ -87,49 +86,22 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   double_t delta_t = tools.GetTimeDiff(meas_package.timestamp_, time_us_);
   time_us_ = meas_package.timestamp_;
 
+  _Prediction(delta_t);
+
   switch (sensorType) {
     case MeasurementPackage::RADAR:
-      _UseRadar(meas_package, delta_t);
+      _UpdateRadar(meas_package);
       break;
     case MeasurementPackage::LASER:
       return;
-      _UseLidar(meas_package, delta_t);
+      _UpdateLidar(meas_package);
       break;
     default:
       break;
   }
+
   std::cout << "x_out:" << x_ << std::endl;
   std::cout << "P_out:" << P_ << std::endl;
-}
-
-// TODO: Refactor below two functions?
-/**
- * @param meas_package
- * @param delta_t
- */
-void UKF::_UseLidar(MeasurementPackage meas_package, double_t delta_t) {
-  _PredictLidar(delta_t);
-  _UpdateLidar(meas_package);
-}
-
-/**
- * @param meas_package
- * @param delta_t
- */
-void UKF::_UseRadar(MeasurementPackage meas_package, double_t delta_t){
-  _PredictRadar(delta_t);
-  _UpdateRadar(meas_package);
-}
-
-/**
- * Prediction step for Lidar
- * @param delta_t
- */
-void UKF::_PredictLidar(double_t delta_t) {
-  double_t threshold = 1e-3;
-  if (delta_t <= threshold) {
-    return;
-  }
 }
 
 /**
@@ -137,7 +109,7 @@ void UKF::_PredictLidar(double_t delta_t) {
  * @param {double_t} delta_t the change in time (in seconds) between the last
  * measurement and this one.
  */
-void UKF::_PredictRadar(double_t delta_t) {
+void UKF::_Prediction(double_t delta_t) {
   /**
   Complete this function! Estimate the object's location. Modify the state
   vector, x_. Predict sigma points, the state, and the state covariance matrix.

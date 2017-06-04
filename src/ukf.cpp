@@ -93,7 +93,6 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
       _UpdateRadar(meas_package);
       break;
     case MeasurementPackage::LASER:
-      return;
       _UpdateLidar(meas_package);
       break;
     default:
@@ -137,6 +136,8 @@ void UKF::_UpdateLidar(MeasurementPackage meas_package) {
   You'll also need to calculate the lidar NIS.
   */
   KF.Update(meas_package);
+  x_ = KF.GetState();
+  P_ = KF.GetProcessMatrix();
 }
 
 /**
